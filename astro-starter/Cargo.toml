@@ -1,0 +1,10 @@
+[package]
+name = "astro-starter"
+version = "0.1.0"
+authors = ["konsti219 <37149441+konsti219@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_json = "1.0"
