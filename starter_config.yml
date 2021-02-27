@@ -5,7 +5,7 @@ owner: yourName # set this to your ingame name.
 # setting the owner here will make you owner for all servers. It can be overwritten by setting it on a serevr.
 
 servers:
-    - id: server1 # unique identifier for a server
+    - id: server1 # unique identifier for a server (no spaces)
       type: local-host # setup a local server with this config
       name: My local server # a readable name
       IP: _public # auto populate with detected public IP
@@ -14,7 +14,7 @@ servers:
       console_password: _random # auto generate random string
       whitelist: false # optional, default false
       save_interval: 900 # save interval in seconds, 900s = 15min, optional, default 900
-      backup_saves: true # optional, default false
+      backup_saves: true # optional, default true
       backup_interval: 3600 # backup interval in seconds, 3600s = 1h, optional, default 3600
       enable_astrochat_integration: false # AstroChat is a chat mod for astroneer, optional, default false
     - id: server2

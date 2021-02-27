@@ -1,7 +1,7 @@
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 extern crate yaml_rust;
-use yaml_rust::YamlLoader;
+use yaml_rust::{yaml, YamlLoader};
 
 pub mod starter_config {
     use std::{fs::read_to_string, path::PathBuf};
@@ -47,7 +47,7 @@ pub mod starter_config {
             let doc = &docs[0];
 
             // print full doc
-            println!("{:?}", doc);
+            // println!("{:?}", doc);
 
             // handle owner
             if doc["owner"].is_badvalue() {
@@ -57,7 +57,6 @@ pub mod starter_config {
                 Some(o) => o,
                 None => return Err("Global owner field could not be parsed as string."),
             };
-            println!("owner: {:?}", owner);
 
             // handle webserver_port
             if doc["webserver_port"].is_badvalue() {
@@ -67,17 +66,56 @@ pub mod starter_config {
                 Some(o) => o,
                 None => return Err("Global webserver_port field could not be parsed as integer."),
             } as u16;
-            println!("webserver_port: {:?}", webserver_port);
 
             // hadle servers
             if doc["servers"].is_badvalue() {
                 return Err("Missing global servers field.");
             }
 
+            let mut servers: Vec<ServerConfig> = Vec::new();
+            match doc["servers"] {
+                yaml::Yaml::Array(ref servers_c) => {
+                    for server_c in servers_c {
+                        servers.push(match handle_server(server_c) {
+                            Ok(s) => s,
+                            Err(e) => return Err(e),
+                        });
+                    }
+                }
+                _ => return Err("Global servers field is not array."),
+            };
+
             Ok(StarterConfig {
                 webserver_port,
-                servers: vec![],
+                servers,
             })
         }
+    }
+
+    fn handle_server(server: &yaml::Yaml) -> Result<ServerConfig, &'static str> {
+        println!("{:?}", server);
+
+        if server["id"].is_badvalue() {
+            return Err("Missing id field for a server.");
+        }
+        let id = match server["id"].as_str() {
+            Some(o) => o,
+            None => return Err("id field could not be parsed as string."),
+        };
+        println!("id: {:?}", id);
+
+        Ok(ServerConfig {
+            id: String::from(id),
+            server_type: ServerType::Local,
+            name: String::from("x"),
+            server_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080),
+            console_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080),
+            console_password: String::from("x"),
+            whitelist: false,
+            save_interval: 900,
+            backup_saves: true,
+            backup_interval: 3600,
+            enable_astrochat_integration: false,
+        })
     }
 }

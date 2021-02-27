@@ -12,7 +12,7 @@ pub fn run() -> Result<(), String> {
     println!("work_dir: {:?}", work_dir);
 
     let config_path = Path::new(&work_dir).join("starter_config.yml");
-    let mut config = match starter_config::StarterConfig::new(&config_path) {
+    let config = match starter_config::StarterConfig::new(&config_path) {
         Ok(c) => c,
         Err(err) => {
             let mut out = "Config error: ".to_owned();
@@ -20,6 +20,7 @@ pub fn run() -> Result<(), String> {
             return Err(out);
         }
     };
+    println!("{:?}", config);
 
     Ok(())
 }
