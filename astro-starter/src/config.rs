@@ -34,12 +34,12 @@ pub mod starter_config {
     }
 
     impl StarterConfig {
-        pub fn new(config_path: &PathBuf) -> Result<StarterConfig, &'static str> {
+        pub fn new(config_path: &PathBuf) -> Result<StarterConfig, String> {
             let config_path = config_path.to_str().unwrap();
 
             let config_content = match read_to_string(config_path) {
                 Ok(c) => c,
-                Err(_) => return Err("Failed to read config file."),
+                Err(_) => return Err(String::from("Failed to read config file.")),
             };
             let docs = YamlLoader::load_from_str(&config_content)
                 .expect("Could not parse yaml config file.");
@@ -51,25 +51,33 @@ pub mod starter_config {
 
             // handle owner
             if doc["owner"].is_badvalue() {
-                return Err("Missing global owner field.");
+                return Err(String::from("Missing global owner field."));
             }
             let owner = match doc["owner"].as_str() {
                 Some(o) => o,
-                None => return Err("Global owner field could not be parsed as string."),
+                None => {
+                    return Err(String::from(
+                        "Global owner field could not be parsed as string.",
+                    ))
+                }
             };
 
             // handle webserver_port
             if doc["webserver_port"].is_badvalue() {
-                return Err("Missing global webserver_port field.");
+                return Err(String::from("Missing global webserver_port field."));
             }
             let webserver_port = match doc["webserver_port"].as_i64() {
                 Some(o) => o,
-                None => return Err("Global webserver_port field could not be parsed as integer."),
+                None => {
+                    return Err(String::from(
+                        "Global webserver_port field could not be parsed as integer.",
+                    ))
+                }
             } as u16;
 
             // hadle servers
             if doc["servers"].is_badvalue() {
-                return Err("Missing global servers field.");
+                return Err(String::from("Missing global servers field."));
             }
 
             let mut servers: Vec<ServerConfig> = Vec::new();
@@ -82,7 +90,7 @@ pub mod starter_config {
                         });
                     }
                 }
-                _ => return Err("Global servers field is not array."),
+                _ => return Err(String::from("Global servers field is not array.")),
             };
 
             Ok(StarterConfig {
@@ -92,22 +100,71 @@ pub mod starter_config {
         }
     }
 
-    fn handle_server(server: &yaml::Yaml) -> Result<ServerConfig, &'static str> {
+    fn handle_server(server: &yaml::Yaml) -> Result<ServerConfig, String> {
         println!("{:?}", server);
 
+        // handle id
         if server["id"].is_badvalue() {
-            return Err("Missing id field for a server.");
+            return Err(String::from("Missing id field for a server."));
         }
         let id = match server["id"].as_str() {
-            Some(o) => o,
-            None => return Err("id field could not be parsed as string."),
+            Some(v) => v,
+            None => return Err(String::from("id field could not be parsed as string.")),
         };
         println!("id: {:?}", id);
 
+        // handle server_type
+        if server["type"].is_badvalue() {
+            return Err(String::from("Missing server_type field, id: ") + &id);
+        }
+        let server_type = match server["type"].as_str() {
+            Some(v) => {
+                if v == "local" {
+                    ServerType::Local
+                } else if v == "remote" {
+                    ServerType::Remote
+                } else {
+                    return Err(
+                        String::from("server_type field needs to be local/remore, id: ") + &id,
+                    );
+                }
+            }
+            None => {
+                return Err(
+                    String::from("server_type field could not be parsed as string, id: ") + &id,
+                )
+            }
+        };
+        println!("server_type: {:?}", server_type);
+
+        // handle name
+        if server["name"].is_badvalue() {
+            return Err(String::from("Missing name field, id: ") + &id);
+        }
+        let name = match server["name"].as_str() {
+            Some(v) => v,
+            None => {
+                return Err(String::from("name field could not be parsed as string, id: ") + &id)
+            }
+        };
+        println!("name: {:?}", name);
+
+        // https://api.ipify.org/
+
+        // handle
+        /*if server["_"].is_badvalue() {
+            return Err(String::from("Missing _ field, id: ") + &id);
+        }
+        let _ = match server["_"].as_str() {
+            Some(v) => v,
+            None => return Err(String::from("_ field could not be parsed as string, id: ") + &id),
+        };*/
+        //println!("_: {:?}", x);
+
         Ok(ServerConfig {
             id: String::from(id),
-            server_type: ServerType::Local,
-            name: String::from("x"),
+            server_type,
+            name: String::from(name),
             server_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080),
             console_addr: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080),
             console_password: String::from("x"),

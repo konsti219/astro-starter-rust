@@ -15,8 +15,8 @@ pub fn run() -> Result<(), String> {
     let config = match starter_config::StarterConfig::new(&config_path) {
         Ok(c) => c,
         Err(err) => {
-            let mut out = "Config error: ".to_owned();
-            out.push_str(err);
+            let mut out = String::from("Config error: ");
+            out.push_str(&err);
             return Err(out);
         }
     };
