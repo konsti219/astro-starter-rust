@@ -1,30 +1,12 @@
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::{env, path::Path, process};
 
-#[derive(Debug)]
-enum ServerType {
-    Local,
-    Remote,
-}
-#[derive(Debug)]
-struct ServerConfig {
-    id: String,
-    server_type: ServerType,
-    name: String,
-    server_addr: SocketAddr,
-    console_addr: SocketAddr,
-    console_password: String,
-    whitelist: bool,
-    save_interval: usize,
-    backup_saves: bool,
-    backup_interval: usize,
-    enable_astrochat_integration: bool,
-}
-#[derive(Debug)]
-struct StarterConfig {
-    webserver_port: u16,
-    servers: Vec<ServerConfig>,
-}
+mod config;
+pub use crate::config::starter_config;
 
 fn main() {
-    println!("Do stuff");
+    println!("Astro Starter 0.1.0");
+
+    let work_dir = env::current_dir().expect("Could not get work_dir");
+
+    let mut config = starter_config::StarterConfig::new(&work_dir);
 }
