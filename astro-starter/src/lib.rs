@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, path::Path};
 
 mod config;
 pub use crate::config::starter_config;
@@ -11,10 +11,11 @@ pub fn run() -> Result<(), String> {
 
     println!("work_dir: {:?}", work_dir);
 
-    let mut config = match starter_config::StarterConfig::new(&work_dir) {
+    let config_path = Path::new(&work_dir).join("starter_config.yml");
+    let mut config = match starter_config::StarterConfig::new(&config_path) {
         Ok(c) => c,
         Err(err) => {
-            let mut out = "config error: ".to_owned();
+            let mut out = "Config error: ".to_owned();
             out.push_str(err);
             return Err(out);
         }
