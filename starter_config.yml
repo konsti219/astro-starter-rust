@@ -15,6 +15,7 @@ servers:
       console_port: _auto # auto to port + 1
       console_password: _random # auto generate random string
       whitelist: false # optional, default false
+      owner: somebodyelse # owner override, optional
       save_interval: 900 # save interval in seconds, 900s = 15min, optional, default 900
       backup_saves: true # optional, default true
       backup_interval: 3600 # backup interval in seconds, 3600s = 1h, optional, default 3600
