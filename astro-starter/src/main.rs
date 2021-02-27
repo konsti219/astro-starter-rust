@@ -1,12 +1,23 @@
-use std::{env, path::Path, process};
+use std::{
+    io::{stdin, stdout, Write},
+    process,
+};
 
-mod config;
-pub use crate::config::starter_config;
+use astro_starter;
 
 fn main() {
     println!("Astro Starter 0.1.0");
 
-    let work_dir = env::current_dir().expect("Could not get work_dir");
+    if let Err(e) = astro_starter::run() {
+        println!("Application error: {}", e);
 
-    let mut config = starter_config::StarterConfig::new(&work_dir);
+        pause();
+        process::exit(1);
+    }
+}
+
+fn pause() {
+    print!("Press Enter to continue... ");
+    let _ = stdout().flush();
+    stdin().read_line(&mut String::new()).unwrap();
 }

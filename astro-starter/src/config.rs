@@ -1,5 +1,4 @@
 use std::{
-    fs,
     net::{IpAddr, Ipv4Addr, SocketAddr},
     path::Path,
 };
@@ -8,7 +7,7 @@ extern crate yaml_rust;
 use yaml_rust::YamlLoader;
 
 pub mod starter_config {
-    use std::path::PathBuf;
+    use std::{fs::read_to_string, path::PathBuf};
 
     use super::*;
 
@@ -38,18 +37,21 @@ pub mod starter_config {
     }
 
     impl StarterConfig {
-        pub fn new(work_dir: &PathBuf) -> StarterConfig {
+        pub fn new(work_dir: &PathBuf) -> Result<StarterConfig, &'static str> {
             let config_path = Path::new(&work_dir).join("starter_config.yml");
-            let config_path = config_path
-                .to_str()
-                .expect("Error converting path in StarterConfig::new");
-            let docs =
-                YamlLoader::load_from_str(config_path).expect("Could not parse yaml config file");
+            let config_path = config_path.to_str().unwrap();
 
-            StarterConfig {
+            let config_content = match read_to_string(config_path) {
+                Ok(c) => c,
+                Err(_) => return Err("Failed to read config file."),
+            };
+            let docs = YamlLoader::load_from_str(&config_content)
+                .expect("Could not parse yaml config file.");
+
+            Ok(StarterConfig {
                 webserver_port: 5000,
                 servers: vec![],
-            }
+            })
         }
     }
 }
